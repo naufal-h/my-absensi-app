@@ -51,7 +51,9 @@ export function AbsensiForm() {
 
       await postAbsensi({
         user_id: user!.id,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toLocaleString("sv-SE", {
+          timeZone: "Asia/Jakarta",
+        }),
         photo: photoUrl,
       });
 

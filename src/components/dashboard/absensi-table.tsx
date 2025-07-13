@@ -8,7 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+
 import {
   Popover,
   PopoverContent,
@@ -104,11 +104,9 @@ export function AbsensiTable({
         if (variant === "admin") {
           const res = await getAbsensiAdmin();
           setData(res);
-          console.log("Data fetched for admin:", res);
         } else if (variant === "employee" && userId) {
           const res = await getAbsensiSaya(userId);
           setData(res);
-          console.log("Data fetched for employee:", res);
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
@@ -127,12 +125,16 @@ export function AbsensiTable({
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
 
   const filteredData = React.useMemo(() => {
-    if (!dateRange || !dateRange.from || !dateRange.to) return data;
+    if (!dateRange?.from || !dateRange?.to) return data;
+
+    const start = new Date(dateRange.from);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(dateRange.to);
+    end.setHours(23, 59, 59, 999);
+
     return data.filter((item) =>
-      isWithinInterval(parseISO(item.timestamp), {
-        start: dateRange.from!,
-        end: dateRange.to!,
-      })
+      isWithinInterval(parseISO(item.timestamp), { start, end })
     );
   }, [data, dateRange]);
 
@@ -158,16 +160,6 @@ export function AbsensiTable({
   return (
     <div className="w-full">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 py-4">
-        <Input
-          placeholder="Filter nama atau email..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(e) => {
-            table.getColumn("name")?.setFilterValue(e.target.value);
-            table.getColumn("email")?.setFilterValue(e.target.value);
-          }}
-          className="max-w-sm"
-        />
-
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="ml-auto">
