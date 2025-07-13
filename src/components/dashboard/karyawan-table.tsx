@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteKaryawan, getAllKaryawan } from "@/lib/karyawan";
 import {
   ColumnDef,
   flexRender,
@@ -20,53 +21,47 @@ import { KaryawanFormModal } from "../form/karyawan-form-modal";
 import { Button } from "../ui/button";
 
 type Karyawan = {
-  id: string;
-  nama: string;
+  id: number;
+  name: string;
   email: string;
-  jabatan: string;
-  departemen: string;
+  position: string;
+  division: string;
 };
 
-const karyawanData: Karyawan[] = [
-  {
-    id: "K001",
-    nama: "Budi Santoso",
-    email: "budi@example.com",
-    jabatan: "Frontend Developer",
-    departemen: "Corp IT",
-  },
-  {
-    id: "K002",
-    nama: "Ani Rahmawati",
-    email: "ani@example.com",
-    jabatan: "Backend Developer",
-    departemen: "Corp IT",
-  },
-  {
-    id: "K003",
-    nama: "Dian Prasetyo",
-    email: "dian@example.com",
-    jabatan: "UI/UX Designer",
-    departemen: "Product Design",
-  },
-  {
-    id: "K004",
-    nama: "Rina Lestari",
-    email: "rina@example.com",
-    jabatan: "QA Engineer",
-    departemen: "Quality Assurance",
-  },
-];
-
-export function KaryawanTable() {
+export function KaryawanTable({
+  refresh,
+  onRefresh,
+}: {
+  refresh: boolean;
+  onRefresh?: () => void;
+}) {
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<Karyawan | null>(null);
+  const [data, setData] = React.useState<Karyawan[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    const fetch = async () => {
+      try {
+        setLoading(true);
+        const res = await getAllKaryawan();
+        setData(res);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        setError(err.message || "Gagal mengambil data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, [refresh]);
 
   const columns: ColumnDef<Karyawan>[] = [
     {
-      accessorKey: "nama",
+      accessorKey: "name",
       header: "Nama",
-      cell: ({ row }) => row.getValue("nama"),
+      cell: ({ row }) => row.getValue("name"),
     },
     {
       accessorKey: "email",
@@ -74,14 +69,14 @@ export function KaryawanTable() {
       cell: ({ row }) => row.getValue("email"),
     },
     {
-      accessorKey: "jabatan",
+      accessorKey: "position",
       header: "Jabatan",
-      cell: ({ row }) => row.getValue("jabatan"),
+      cell: ({ row }) => row.getValue("position"),
     },
     {
-      accessorKey: "departemen",
+      accessorKey: "division",
       header: "Departemen",
-      cell: ({ row }) => row.getValue("departemen"),
+      cell: ({ row }) => row.getValue("division"),
     },
     {
       id: "aksi",
@@ -100,7 +95,24 @@ export function KaryawanTable() {
             >
               <Pencil className="w-4 h-4" />
             </Button>
-            <Button size="icon" onClick={() => alert(`Hapus ${karyawan.nama}`)}>
+            <Button
+              size="icon"
+              onClick={() => {
+                const confirm = window.confirm(
+                  `Yakin ingin menghapus ${karyawan.name}?`
+                );
+                if (confirm) {
+                  deleteKaryawan(karyawan.id)
+                    .then(() => {
+                      alert("Karyawan berhasil dihapus");
+                      onRefresh?.();
+                    })
+                    .catch((err) => {
+                      alert(err.message || "Gagal menghapus karyawan");
+                    });
+                }
+              }}
+            >
               <Trash className="w-4 h-4" />
             </Button>
           </div>
@@ -110,7 +122,7 @@ export function KaryawanTable() {
   ];
 
   const table = useReactTable({
-    data: karyawanData,
+    data: data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -136,7 +148,25 @@ export function KaryawanTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-10"
+                >
+                  Memuat data...
+                </TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-10 text-red-500"
+                >
+                  {error}
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -153,7 +183,7 @@ export function KaryawanTable() {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-10"
+                  className="text-center py-10 text-muted-foreground"
                 >
                   Tidak ada hasil ditemukan.
                 </TableCell>
@@ -193,10 +223,14 @@ export function KaryawanTable() {
           onOpenChange={setOpen}
           mode="edit"
           defaultValues={{
-            nama: selected.nama,
+            name: selected.name,
             email: selected.email,
-            jabatan: selected.jabatan,
-            departemen: selected.departemen,
+            position: selected.position,
+            division: selected.division,
+          }}
+          onSuccess={() => {
+            setOpen(false);
+            onRefresh?.();
           }}
         />
       )}

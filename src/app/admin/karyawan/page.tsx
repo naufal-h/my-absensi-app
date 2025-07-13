@@ -8,6 +8,9 @@ import { useState } from "react";
 
 export default function AdminKaryawanPage() {
   const [open, setOpen] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+
+  const triggerRefresh = () => setRefresh((r) => !r);
 
   return (
     <div className="space-y-4 p-6">
@@ -19,9 +22,17 @@ export default function AdminKaryawanPage() {
         </Button>
       </div>
 
-      <KaryawanTable />
+      <KaryawanTable refresh={refresh} onRefresh={triggerRefresh} />
 
-      <KaryawanFormModal open={open} onOpenChange={setOpen} mode="create" />
+      <KaryawanFormModal
+        open={open}
+        onOpenChange={setOpen}
+        mode="create"
+        onSuccess={() => {
+          triggerRefresh();
+          setOpen(false);
+        }}
+      />
     </div>
   );
 }

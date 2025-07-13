@@ -3,16 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createKaryawan, updateKaryawan } from "@/lib/karyawan";
 import { useState } from "react";
 
 interface KaryawanFormProps {
   onSuccess?: () => void;
   mode?: "create" | "edit";
   defaultValues?: {
-    nama: string;
+    name: string;
     email: string;
-    jabatan?: string;
-    departemen?: string;
+    position?: string;
+    division?: string;
   };
 }
 
@@ -21,26 +22,38 @@ export function KaryawanForm({
   mode = "create",
   defaultValues,
 }: KaryawanFormProps) {
-  const [nama, setNama] = useState(defaultValues?.nama || "");
+  const [nama, setNama] = useState(defaultValues?.name || "");
   const [email, setEmail] = useState(defaultValues?.email || "");
-  const [jabatan, setJabatan] = useState(defaultValues?.jabatan || "");
-  const [departemen, setDepartemen] = useState(defaultValues?.departemen || "");
+  const [jabatan, setJabatan] = useState(defaultValues?.position || "");
+  const [departemen, setDepartemen] = useState(defaultValues?.division || "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (mode === "create") {
-      console.log("CREATE:", { nama, email, jabatan, departemen });
-    } else {
-      console.log("UPDATE:", { nama, email, jabatan, departemen });
-    }
+    try {
+      if (mode === "create") {
+        await createKaryawan({
+          email,
+          name: nama,
+          division: departemen,
+          position: jabatan,
+        });
+        alert("Karyawan berhasil ditambahkan ✅");
+      } else {
+        await updateKaryawan({
+          email,
+          name: nama,
+          division: departemen,
+          position: jabatan,
+        });
+        alert("Data karyawan berhasil diupdate ✅");
+      }
 
-    setTimeout(() => {
-      alert(
-        `${mode === "create" ? "Karyawan ditambahkan" : "Data diupdate"} ✅`
-      );
       onSuccess?.();
-    }, 300);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      alert(err.message || "Terjadi kesalahan.");
+    }
   };
 
   return (

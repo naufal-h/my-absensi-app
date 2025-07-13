@@ -11,11 +11,12 @@ type KaryawanFormModalProps = {
   onOpenChange: (v: boolean) => void;
   mode?: "create" | "edit";
   defaultValues?: {
-    nama: string;
+    name: string;
     email: string;
-    jabatan?: string;
-    departemen?: string;
+    position?: string;
+    division?: string;
   };
+  onSuccess?: () => void;
 };
 
 export function KaryawanFormModal({
@@ -23,6 +24,7 @@ export function KaryawanFormModal({
   onOpenChange,
   mode = "create",
   defaultValues,
+  onSuccess = () => {},
 }: KaryawanFormModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,7 +37,7 @@ export function KaryawanFormModal({
         <KaryawanForm
           mode={mode}
           defaultValues={defaultValues}
-          onSuccess={() => onOpenChange(false)}
+          onSuccess={onSuccess}
         />
       </DialogContent>
     </Dialog>
