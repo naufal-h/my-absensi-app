@@ -1,5 +1,3 @@
-import { AbsensiTable } from "@/components/dashboard/absensi-table";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -35,13 +33,6 @@ export default function Page() {
         <Button className="mt-4 w-full bg-primary text-white hover:cursor-pointer">
           Isi Absensi Hari Ini
         </Button>
-      </Card>
-
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold">
-          Riwayat Absensi (7 Hari Terakhir)
-        </h3>
-        <AbsensiTable />
       </Card>
     </div>
   );

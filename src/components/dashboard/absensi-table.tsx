@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getAbsensiAdmin, getAbsensiSaya } from "@/lib/absensi";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -40,105 +41,17 @@ import * as React from "react";
 import { DateRange } from "react-day-picker";
 
 type Absensi = {
-  id: string;
-  nama: string;
+  name: string;
   email: string;
-  waktuAbsensi: string;
-  foto: string;
+  timestamp: string;
+  photo: string;
 };
-
-const absensiData: Absensi[] = [
-  {
-    id: "1",
-    nama: "Budi Santoso",
-    email: "budi@example.com",
-    waktuAbsensi: "2025-07-09T08:12:00",
-    foto: "/images/bukti/budi-0907.jpg",
-  },
-  {
-    id: "2",
-    nama: "Ani Rahmawati",
-    email: "ani@example.com",
-    waktuAbsensi: "2025-07-10T08:05:00",
-    foto: "/images/bukti/ani-1007.jpg",
-  },
-  {
-    id: "1",
-    nama: "Budi Santoso",
-    email: "budi@example.com",
-    waktuAbsensi: "2025-07-09T08:12:00",
-    foto: "/images/bukti/budi-0907.jpg",
-  },
-  {
-    id: "2",
-    nama: "Ani Rahmawati",
-    email: "ani@example.com",
-    waktuAbsensi: "2025-07-10T08:05:00",
-    foto: "/images/bukti/ani-1007.jpg",
-  },
-  {
-    id: "1",
-    nama: "Budi Santoso",
-    email: "budi@example.com",
-    waktuAbsensi: "2025-07-09T08:12:00",
-    foto: "/images/bukti/budi-0907.jpg",
-  },
-  {
-    id: "2",
-    nama: "Ani Rahmawati",
-    email: "ani@example.com",
-    waktuAbsensi: "2025-07-10T08:05:00",
-    foto: "/images/bukti/ani-1007.jpg",
-  },
-  {
-    id: "1",
-    nama: "Budi Santoso",
-    email: "budi@example.com",
-    waktuAbsensi: "2025-07-09T08:12:00",
-    foto: "/images/bukti/budi-0907.jpg",
-  },
-  {
-    id: "2",
-    nama: "Ani Rahmawati",
-    email: "ani@example.com",
-    waktuAbsensi: "2025-07-10T08:05:00",
-    foto: "/images/bukti/ani-1007.jpg",
-  },
-  {
-    id: "1",
-    nama: "Budi Santoso",
-    email: "budi@example.com",
-    waktuAbsensi: "2025-07-09T08:12:00",
-    foto: "/images/bukti/budi-0907.jpg",
-  },
-  {
-    id: "2",
-    nama: "Ani Rahmawati",
-    email: "ani@example.com",
-    waktuAbsensi: "2025-07-10T08:05:00",
-    foto: "/images/bukti/ani-1007.jpg",
-  },
-  {
-    id: "1",
-    nama: "Budi Santoso",
-    email: "budi@example.com",
-    waktuAbsensi: "2025-07-09T08:12:00",
-    foto: "/images/bukti/budi-0907.jpg",
-  },
-  {
-    id: "2",
-    nama: "Ani Rahmawati",
-    email: "ani@example.com",
-    waktuAbsensi: "2025-07-10T08:05:00",
-    foto: "/images/bukti/ani-1007.jpg",
-  },
-];
 
 export const columns: ColumnDef<Absensi>[] = [
   {
-    accessorKey: "nama",
+    accessorKey: "name",
     header: "Nama",
-    cell: ({ row }) => row.getValue("nama"),
+    cell: ({ row }) => row.getValue("name"),
   },
   {
     accessorKey: "email",
@@ -146,21 +59,21 @@ export const columns: ColumnDef<Absensi>[] = [
     cell: ({ row }) => row.getValue("email"),
   },
   {
-    accessorKey: "waktuAbsensi",
+    accessorKey: "timestamp",
     header: "Waktu Absensi",
     cell: ({ row }) =>
-      format(parseISO(row.getValue("waktuAbsensi")), "dd/MM/yyyy HH:mm"),
+      format(parseISO(row.getValue("timestamp")), "dd/MM/yyyy HH:mm"),
   },
   {
     id: "bukti",
     header: "Bukti",
     cell: ({ row }) => {
-      const foto = row.original.foto;
+      const photo = `http://localhost:3003${row.original.photo}`;
       return (
         <Button
           size="icon"
           variant="ghost"
-          onClick={() => window.open(foto, "_blank")}
+          onClick={() => window.open(photo, "_blank")}
         >
           <Eye className="w-4 h-4" />
         </Button>
@@ -169,11 +82,44 @@ export const columns: ColumnDef<Absensi>[] = [
   },
 ];
 
-export function AbsensiTable() {
+export function AbsensiTable({
+  variant = "employee",
+  userId,
+}: {
+  variant?: "employee" | "admin";
+  userId?: number;
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [data, setData] = React.useState<Absensi[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        if (variant === "admin") {
+          const res = await getAbsensiAdmin();
+          setData(res);
+          console.log("Data fetched for admin:", res);
+        } else if (variant === "employee" && userId) {
+          const res = await getAbsensiSaya(userId);
+          setData(res);
+          console.log("Data fetched for employee:", res);
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        setError(err.message || "Gagal mengambil data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -181,14 +127,14 @@ export function AbsensiTable() {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
 
   const filteredData = React.useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return absensiData;
-    return absensiData.filter((item) =>
-      isWithinInterval(parseISO(item.waktuAbsensi), {
+    if (!dateRange || !dateRange.from || !dateRange.to) return data;
+    return data.filter((item) =>
+      isWithinInterval(parseISO(item.timestamp), {
         start: dateRange.from!,
         end: dateRange.to!,
       })
     );
-  }, [dateRange]);
+  }, [data, dateRange]);
 
   const table = useReactTable({
     data: filteredData,
@@ -214,9 +160,9 @@ export function AbsensiTable() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 py-4">
         <Input
           placeholder="Filter nama atau email..."
-          value={(table.getColumn("nama")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(e) => {
-            table.getColumn("nama")?.setFilterValue(e.target.value);
+            table.getColumn("name")?.setFilterValue(e.target.value);
             table.getColumn("email")?.setFilterValue(e.target.value);
           }}
           className="max-w-sm"
@@ -288,7 +234,25 @@ export function AbsensiTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-10"
+                >
+                  Memuat data...
+                </TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-10 text-red-500"
+                >
+                  {error}
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (

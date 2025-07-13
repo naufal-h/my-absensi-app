@@ -1,5 +1,3 @@
-import { AbsensiTable } from "@/components/dashboard/absensi-table";
-
 import { Card } from "@/components/ui/card";
 
 import Image from "next/image";
@@ -31,11 +29,6 @@ export default function Page() {
             <p className="text-sm text-gray-500">Software Engineer</p>
           </div>
         </div>
-      </Card>
-
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold">Absensi Terbaru</h3>
-        <AbsensiTable />
       </Card>
     </div>
   );
