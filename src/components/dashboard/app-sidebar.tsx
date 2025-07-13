@@ -1,7 +1,5 @@
 "use client";
 
-import * as React from "react";
-
 import {
   Sidebar,
   SidebarContent,
@@ -9,45 +7,37 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import * as React from "react";
 
-import { CalendarClock, Clock8 } from "lucide-react";
+import type { SidebarNavItem } from "@/lib/sidebar-items";
 import { NavHeader } from "../navigation/nav-header";
 import { NavMain } from "../navigation/nav-main";
 import { NavUser } from "../navigation/nav-user";
 
-const data = {
+export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
-    name: "Nama",
-    email: "nama@dexagroup.com",
-    avatar: "/pfp.jpg",
-  },
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  navMain: SidebarNavItem[];
+}
 
-  navMain: [
-    {
-      title: "Absensi",
-      url: "/employee/absensi",
-      icon: Clock8,
-    },
-    {
-      title: "Riwayat Absensi",
-      url: "/employee/riwayat-absensi",
-      icon: CalendarClock,
-    },
-  ],
-};
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, navMain, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <NavHeader />
       </SidebarHeader>
+
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
