@@ -7,22 +7,23 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { getUserServer } from "@/lib/auth-server";
 import { employeeSidebarItems } from "@/lib/sidebar-items";
+import { redirect } from "next/navigation";
 
-const employeeUser = {
-  name: "Nama",
-  email: "nama@dexagroup.com",
-  avatar: "/pfp.jpg",
-};
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getUserServer();
+
+  if (!user) redirect("/login");
+  if (user.role !== "employee") redirect("/admin");
+
   return (
     <SidebarProvider>
-      <AppSidebar user={employeeUser} navMain={employeeSidebarItems} />
+      <AppSidebar user={user} navMain={employeeSidebarItems} />
 
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

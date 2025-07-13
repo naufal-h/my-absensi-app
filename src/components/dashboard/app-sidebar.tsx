@@ -18,7 +18,6 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
     name: string;
     email: string;
-    avatar: string;
   };
   navMain: SidebarNavItem[];
 }
