@@ -19,7 +19,6 @@ export function AbsensiForm() {
   const today = new Date().toLocaleString("sv-SE", {
     timeZone: "Asia/Jakarta",
   });
-  console.log("Today:", today);
 
   useEffect(() => {
     const fetch = async () => {

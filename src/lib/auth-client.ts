@@ -2,6 +2,8 @@ export async function getUserClient(): Promise<{
   id: number;
   name: string;
   email: string;
+  position: string;
+  division: string;
   role: "admin" | "employee";
 } | null> {
   try {
