@@ -7,7 +7,7 @@ export async function getUserClient(): Promise<{
   role: "admin" | "employee";
 } | null> {
   try {
-    const res = await fetch("http://localhost:3001/api/me", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_AUTH}/me`, {
       credentials: "include",
       cache: "no-store",
     });

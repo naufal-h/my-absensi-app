@@ -2,10 +2,13 @@ export async function uploadFotoAbsen(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("photo", file);
 
-  const res = await fetch("http://localhost:3003/api/upload", {
-    method: "POST",
-    body: formData,
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL_ABSENSI}/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
 
   if (!res.ok) throw new Error("Upload gagal");
 

@@ -10,7 +10,7 @@ export async function getUserServer(): Promise<{
 } | null> {
   try {
     const cookieStore = await cookies();
-    const res = await fetch("http://localhost:3001/api/me", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_AUTH}/me`, {
       headers: {
         Cookie: cookieStore.toString(),
       },
